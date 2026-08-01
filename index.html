@@ -154,11 +154,11 @@
 </script>
 
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script defer src="assets/vendor/three.min.js"></script>
+<script defer src="assets/vendor/DRACOLoader.js"></script>
+<script defer src="assets/vendor/GLTFLoader.js"></script>
+<script defer src="assets/vendor/gsap.min.js"></script>
+<script defer src="assets/vendor/ScrollTrigger.min.js"></script>
 <style>
   :root {
     --neon-orange: #ff6a00;
@@ -188,6 +188,8 @@
   body:hover #cursor { opacity: 1; }
 
   #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; pointer-events: none; }
+  #particle-canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; pointer-events: none; }
+  #particle-canvas { width: 100%; height: 100%; }
   #three-canvas { width: 100%; height: 100%; }
 
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
@@ -221,6 +223,16 @@
   .model-loading.hidden { opacity: 0; }
   @media (max-width: 1100px) { #model-viewer-container { width: min(50vw, 480px); height: min(60vh, 520px); opacity: 0.85; } }
   @media (max-width: 900px) { #model-viewer-container { display: none; } }
+
+  #sword-viewer-container { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: min(85vw, 1200px); height: min(900px, 88vh); z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
+  #sword-canvas { width: 100%; height: 100%; }
+  @media (max-width: 1100px) { #sword-viewer-container { top: -40px; left: 50%; width: min(90vw, 820px); height: min(750px, 76vh); } }
+  @media (max-width: 900px) { #sword-viewer-container { display: none; } }
+
+  #box-viewer-container { position: absolute; top: -90px; left: 18vw; width: min(100vw, 1800px); height: min(1600px, 94vh); z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
+  #box-canvas { width: 100%; height: 100%; }
+  @media (max-width: 1100px) { #box-viewer-container { top: -60px; left: 26vw; width: min(100vw, 1250px); height: min(1100px, 84vh); } }
+  @media (max-width: 900px) { #box-viewer-container { display: none; } }
   .home-eyebrow { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--neon-orange); margin-bottom: 20px; opacity: 0; animation: fadeSlideUp 0.8s 0.4s ease forwards; }
   .home-title { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 28px; opacity: 0; animation: fadeSlideUp 0.8s 0.6s ease forwards; color: var(--text-primary); }
   .home-title span.accent { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255, 106, 0, 0.2); }
@@ -330,6 +342,19 @@
   .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,106,0,0.08), transparent); opacity: 0; transition: opacity 0.4s; display: flex; align-items: flex-end; padding: 24px; }
   .gallery-item:hover .gallery-overlay { opacity: 1; }
   .gallery-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--neon-orange); }
+  .gallery-item { cursor: pointer; }
+
+  .gallery-lightbox { position: fixed; inset: 0; z-index: 999; display: flex; align-items: center; justify-content: center; padding: 40px; background: rgba(2,2,2,0.92); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .gallery-lightbox.active { opacity: 1; pointer-events: auto; }
+  .gallery-lightbox-panel { position: relative; max-width: 92vw; max-height: 88vh; }
+  .gallery-lightbox-panel img { display: block; max-width: 92vw; max-height: 88vh; width: auto; height: auto; border: 1px solid rgba(0,229,255,0.3); box-shadow: 0 0 60px rgba(0,229,255,0.15), 0 20px 60px rgba(0,0,0,0.6); }
+  .gallery-lightbox-panel::before, .gallery-lightbox-panel::after { content: ''; position: absolute; width: 24px; height: 24px; border: 1.5px solid var(--neon-orange); pointer-events: none; }
+  .gallery-lightbox-panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .gallery-lightbox-panel::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .gallery-lightbox-close { position: absolute; top: -48px; right: -8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--text-primary); font-size: 1.4rem; line-height: 1; cursor: pointer; transition: all 0.3s; }
+  .gallery-lightbox-close:hover { background: var(--neon-orange); border-color: var(--neon-orange); color: #000; transform: rotate(90deg); }
+  .gallery-lightbox-caption { position: absolute; bottom: -40px; left: 0; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--neon-orange); }
+  @media (max-width: 900px) { .gallery-lightbox-close { top: 8px; right: 8px; background: rgba(0,0,0,0.6); } .gallery-lightbox-caption { bottom: -32px; } }
 
   #contacts { padding: 140px 8vw 80px; position: relative; }
   .contacts-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
@@ -413,6 +438,10 @@
   <canvas id="three-canvas"></canvas>
 </div>
 
+<div id="particle-canvas-container">
+  <canvas id="particle-canvas"></canvas>
+</div>
+
 <nav id="navbar" aria-label="Primary">
   <a href="#home" class="nav-logo">BLENDER<span>IZM</span></a>
   <div style="display:flex; align-items:center;">
@@ -438,6 +467,10 @@
 </nav>
 
 <section class="section" id="home">
+  <div class="availability-badge reveal" id="availabilityBadge">
+    <span class="availability-dot"></span>
+    <span data-i18n="hero.availability">Currently Accepting New Projects</span>
+  </div>
   <div class="home-eyebrow" data-i18n="hero.eyebrow">// 3D Artist &amp; Freelancer</div>
   <h1 class="home-title" id="home-title">
     <span data-i18n="hero.title_part1">Precision in</span><br>
@@ -451,6 +484,7 @@
     <a href="#gallery" class="btn btn-primary" data-i18n="hero.btn_portfolio">Portfolio</a>
     <a href="offer.html" class="btn btn-primary" data-i18n="hero.btn_contact">Contact</a>
   </div>
+  <div class="response-time-note" data-i18n="hero.response_time">⏱ Typically responds within 24 hours</div>
   <div class="profiles-row">
     <a href="https://www.upwork.com/freelancers/~01f5c09465b2df56f2?mp_source=share" target="_blank" class="profile-link upwork"><svg class="profile-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.561 13.158c-1.102 0-2.135-.467-3.074-1.227l.228-1.076.008-.042c.207-1.143.849-3.06 2.839-3.06 1.492 0 2.703 1.212 2.703 2.703-.001 1.489-1.212 2.702-2.704 2.702zm0-8.14c-2.539 0-4.51 1.649-5.31 4.366-1.22-1.834-2.148-4.036-2.687-5.892H7.828v7.112c-.002 1.406-1.141 2.546-2.547 2.548-1.405-.002-2.543-1.143-2.545-2.548V3.492H0v7.112c0 2.914 2.37 5.303 5.281 5.303 2.913 0 5.283-2.389 5.283-5.303v-1.19c.529 1.107 1.182 2.229 1.974 3.221l-1.673 7.873h2.797l1.213-5.71c1.063.679 2.285 1.109 3.686 1.109 3 0 5.439-2.452 5.439-5.45 0-3-2.439-5.439-5.439-5.439z"/></svg>Upwork</a>
     <a href="https://freelancehunt.com/freelancer/topazonanton.html" target="_blank" class="profile-link freelancehunt"><svg class="profile-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5,3 H9 V21 H5 Z M9,3 H20 V8 H9 Z M9,11 H17 V16 H9 Z"/></svg>Freelancehunt</a>
@@ -539,6 +573,12 @@
 
 <section class="section" id="reviews">
   <div class="section-glow" style="top:100px;left:-150px;"></div>
+
+  <div id="sword-viewer-container">
+    <canvas id="sword-canvas"></canvas>
+    <div class="model-loading" id="swordLoading">Loading model…</div>
+  </div>
+
   <div class="section-header reveal">
     <div class="section-label" data-i18n="reviews.label">02.5 — What Clients Say</div>
     <h2 class="section-title"><span data-i18n="reviews.title">CLIENT</span><br><em data-i18n="reviews.title_em">REVIEWS</em></h2>
@@ -658,6 +698,12 @@
 
 <section class="section" id="pipeline">
   <div class="section-glow" style="top:200px;right:-100px;"></div>
+
+  <div id="box-viewer-container">
+    <canvas id="box-canvas"></canvas>
+    <div class="model-loading" id="boxLoading">Loading model…</div>
+  </div>
+
   <div class="section-header reveal">
     <div class="section-label" data-i18n="pipeline.label">03 — My 3D Workflow Standard</div>
     <h2 class="section-title"><span data-i18n="pipeline.title">PRODUCTION</span><br><em data-i18n="pipeline.title_em">PIPELINE</em></h2>
@@ -744,6 +790,14 @@
   </div>
 </section>
 
+<div class="gallery-lightbox" id="galleryLightbox">
+  <div class="gallery-lightbox-panel">
+    <button class="gallery-lightbox-close" id="galleryLightboxClose" aria-label="Close">&times;</button>
+    <img id="galleryLightboxImg" src="" alt="">
+    <div class="gallery-lightbox-caption" id="galleryLightboxCaption"></div>
+  </div>
+</div>
+
 <section class="section" id="contacts">
   <div class="section-glow" style="bottom:-200px;left:50%;transform:translateX(-50%);"></div>
   <div class="section-header reveal">
@@ -765,7 +819,14 @@
   <div class="footer-copy">3D Artist — Freelancer — 2024. All renders reserved.</div>
 </footer>
 
-<script defer>
+<script>
+// This whole block is wrapped in DOMContentLoaded on purpose: the `defer`
+// attribute has NO effect on inline scripts (only on scripts with a `src`).
+// Without this wrapper, this code would run immediately as the parser
+// reaches it — before the external vendor scripts (three.min.js, etc.)
+// below have actually finished loading — making THREE/gsap/etc. appear
+// "undefined" even though they load correctly moments later.
+document.addEventListener('DOMContentLoaded', function () {
 // ─── CURSOR ───
 document.querySelectorAll('img').forEach((img) => {
   if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
@@ -1303,6 +1364,25 @@ window.addEventListener('mousemove', (e) => {
     modelCamera.updateProjectionMatrix();
     modelRenderer.setSize(container.clientWidth, container.clientHeight);
   });
+
+  // ─ Fade the solid model out the moment scrolling begins — this is the
+  // handoff point where the particle-morph effect (separate script) takes
+  // over and appears to continue the same object as swirling dust. Fades
+  // out fast (first 8% of the scroll journey to Reviews) so the dust isn't
+  // fighting a still-visible solid model.
+  const heroAnchorForFade = document.getElementById('home');
+  const reviewsAnchorForFade = document.getElementById('reviews');
+  function updateHeroModelFade() {
+    if (!heroAnchorForFade || !reviewsAnchorForFade) return;
+    const startY = heroAnchorForFade.offsetTop;
+    const endY = reviewsAnchorForFade.offsetTop - window.innerHeight * 0.35;
+    const raw = (window.scrollY - startY) / Math.max(1, endY - startY);
+    const t = Math.min(1, Math.max(0, raw));
+    const fadeOutEnd = 0.08;
+    container.style.opacity = t < fadeOutEnd ? String(1 - t / fadeOutEnd) : '0';
+  }
+  window.addEventListener('scroll', updateHeroModelFade, { passive: true });
+  updateHeroModelFade();
   })();
   } catch (err) {
     console.error('3D experience failed to initialize:', err);
@@ -1325,13 +1405,17 @@ if (heroSection && 'IntersectionObserver' in window) {
 } else {
   init3DExperience();
 }
+});
 </script>
 
 <!-- This runs as its own script tag on purpose: if the 3D/model code above
      throws (e.g. a CDN script fails to load), that stops the tag above but
      NOT this one — so scroll-reveal, the mobile menu, the contact form,
      and language switching still work regardless. -->
-<script defer>
+<script>
+// Same reasoning as the script above: DOMContentLoaded wrapper needed
+// because inline scripts ignore the `defer` attribute entirely.
+document.addEventListener('DOMContentLoaded', function () {
 // ─── GSAP & SCROLL (with fallback if GSAP/ScrollTrigger fail to load) ───
 const revealElements = document.querySelectorAll('.reveal');
 
@@ -1410,6 +1494,46 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
   modalClose.addEventListener('click', closeReviewModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeReviewModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeReviewModal(); });
+})();
+
+// ─── GALLERY LIGHTBOX ───
+// Clicking a portfolio image opens it larger; closes via the X, clicking
+// outside the image, or Escape.
+(function () {
+  const lightbox = document.getElementById('galleryLightbox');
+  const lightboxImg = document.getElementById('galleryLightboxImg');
+  const lightboxCaption = document.getElementById('galleryLightboxCaption');
+  const lightboxClose = document.getElementById('galleryLightboxClose');
+  if (!lightbox) return;
+
+  function openLightbox(item) {
+    const imgEl = item.querySelector('img');
+    const labelEl = item.querySelector('.gallery-label');
+    if (!imgEl) return;
+    lightboxImg.src = imgEl.src;
+    lightboxImg.alt = imgEl.alt || '';
+    lightboxCaption.textContent = labelEl ? labelEl.textContent.trim() : '';
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.gallery-item').forEach((item) => {
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.addEventListener('click', () => openLightbox(item));
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(item); }
+    });
+  });
+
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 })();
 
 // Mobile menu toggle
@@ -1762,8 +1886,572 @@ const I18N = {
   applyLang(detect());
 })();
 
+});
 </script>
 
 </main>
+<!-- Scroll-driven particle morph: the hero headphones dissolve into swirling,
+     colorful space dust as you scroll, reassembling into the sword near
+     Reviews, then dissolving again into the product box near Pipeline.
+     Isolated in its own script tag so a failure here can't affect anything
+     else on the page. -->
+<script>
+// Same DOMContentLoaded reasoning as the other two script blocks.
+document.addEventListener('DOMContentLoaded', function initParticleMorphEffect() {
+  if (typeof THREE === 'undefined') {
+    console.error('Particle morph effect: THREE.js not available, skipping.');
+    return;
+  }
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
+
+  try {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 10;
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const PARTICLE_COUNT = 450;
+    const BASE_PARTICLE_SIZE = 0.3;
+    const MAX_OPACITY = 0.55;
+    const FADE_ZONE = 0.08;
+
+    // ─── Sample points evenly across a loaded model's surface (area-weighted
+    // triangle picking), rather than just using raw vertices — this gives an
+    // even dust density regardless of how the source mesh was tessellated.
+    // Capped at MAX_TRIANGLES: some models (large, uncompressed, many
+    // meshes) can have hundreds of thousands of triangles — processing all
+    // of them client-side could noticeably stall the page. Above the cap,
+    // a random subset is used instead — visually indistinguishable for
+    // point-cloud sampling purposes, but keeps CPU cost bounded regardless
+    // of how heavy the source model is.
+    const MAX_TRIANGLES = 60000;
+    function sampleSurfacePoints(root, count) {
+      root.updateWorldMatrix(true, true);
+      let triangles = [];
+      const vA = new THREE.Vector3(), vB = new THREE.Vector3(), vC = new THREE.Vector3();
+
+      root.traverse((obj) => {
+        if (!obj.isMesh) return;
+        const geom = obj.geometry;
+        const posAttr = geom.attributes.position;
+        const idxAttr = geom.index;
+        const matrixWorld = obj.matrixWorld;
+        const triCount = idxAttr ? idxAttr.count / 3 : posAttr.count / 3;
+
+        for (let i = 0; i < triCount; i++) {
+          let ia, ib, ic;
+          if (idxAttr) {
+            ia = idxAttr.getX(i * 3); ib = idxAttr.getX(i * 3 + 1); ic = idxAttr.getX(i * 3 + 2);
+          } else {
+            ia = i * 3; ib = i * 3 + 1; ic = i * 3 + 2;
+          }
+          vA.fromBufferAttribute(posAttr, ia).applyMatrix4(matrixWorld);
+          vB.fromBufferAttribute(posAttr, ib).applyMatrix4(matrixWorld);
+          vC.fromBufferAttribute(posAttr, ic).applyMatrix4(matrixWorld);
+          const area = new THREE.Triangle(vA, vB, vC).getArea();
+          if (area > 0) triangles.push({ a: vA.clone(), b: vB.clone(), c: vC.clone(), area });
+        }
+      });
+
+      if (triangles.length > MAX_TRIANGLES) {
+        for (let i = triangles.length - 1; i > triangles.length - 1 - MAX_TRIANGLES && i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = triangles[i]; triangles[i] = triangles[j]; triangles[j] = tmp;
+        }
+        triangles = triangles.slice(triangles.length - MAX_TRIANGLES);
+      }
+
+      const points = new Float32Array(count * 3);
+      if (triangles.length === 0) return points;
+
+      let totalArea = 0;
+      const cumulative = new Float32Array(triangles.length);
+      for (let i = 0; i < triangles.length; i++) { totalArea += triangles[i].area; cumulative[i] = totalArea; }
+
+      for (let i = 0; i < count; i++) {
+        const r = Math.random() * totalArea;
+        let lo = 0, hi = cumulative.length - 1;
+        while (lo < hi) { const mid = (lo + hi) >> 1; if (cumulative[mid] < r) lo = mid + 1; else hi = mid; }
+        const tri = triangles[lo];
+        const r1 = Math.random(), r2 = Math.random();
+        const sq1 = Math.sqrt(r1);
+        const u = 1 - sq1, v = sq1 * (1 - r2), w = sq1 * r2;
+        points[i * 3] = u * tri.a.x + v * tri.b.x + w * tri.c.x;
+        points[i * 3 + 1] = u * tri.a.y + v * tri.b.y + w * tri.c.y;
+        points[i * 3 + 2] = u * tri.a.z + v * tri.b.z + w * tri.c.z;
+      }
+      return points;
+    }
+
+    // Recenter a point cloud on its own bounding box and scale it to a
+    // target on-screen size, so source models at very different native
+    // scales all read as comparably sized dust clouds.
+    function centerAndScale(points, targetSize) {
+      let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+      for (let i = 0; i < points.length; i += 3) {
+        const x = points[i], y = points[i + 1], z = points[i + 2];
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+        if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+      }
+      const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2;
+      const extent = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 1;
+      const scale = targetSize / extent;
+      for (let i = 0; i < points.length; i += 3) {
+        points[i] = (points[i] - cx) * scale;
+        points[i + 1] = (points[i + 1] - cy) * scale;
+        points[i + 2] = (points[i + 2] - cz) * scale;
+      }
+      return points;
+    }
+
+    // Computes a dust-cloud target size (for centerAndScale) that visually
+    // matches how large the real solid model appears on screen in its own
+    // small viewer. fitDistance is passed in explicitly since different
+    // viewers use different framing formulas.
+    function computeMatchedDustSize(containerEl, modelRadiusAfterScale, fitDistance, subViewerFovDeg) {
+      const containerHeight = (containerEl && containerEl.clientHeight) || 400;
+      const vFovRad = THREE.MathUtils.degToRad(subViewerFovDeg);
+      const angularHalf = Math.atan(modelRadiusAfterScale / fitDistance);
+      const pixelDiameter = containerHeight * (Math.tan(angularHalf) / Math.tan(vFovRad / 2));
+      const particleFovRad = THREE.MathUtils.degToRad(50);
+      const particleDistance = 10;
+      const visibleHeightWorld = 2 * particleDistance * Math.tan(particleFovRad / 2);
+      const worldPerPixel = visibleHeightWorld / window.innerHeight;
+      const DUST_SIZE_SCALE = 0.65; // pulls the cloud in tighter/smaller than an exact real-model match, per feedback
+      return pixelDiameter * worldPerPixel * DUST_SIZE_SCALE;
+    }
+
+    // ─── Particle sprite — a soft, blurred, feathered blob (not a hard
+    // edge), so overlapping particles blend into continuous colored smoke
+    // rather than reading as distinct dots or glyphs. Shared by both stages.
+    function createSmokeBlobSprite() {
+      const size = 128;
+      const c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      const cx = size / 2, cy = size / 2;
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+      glow.addColorStop(0, 'rgba(255,255,255,0.5)');
+      glow.addColorStop(0.35, 'rgba(255,255,255,0.3)');
+      glow.addColorStop(0.7, 'rgba(255,255,255,0.09)');
+      glow.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, size, size);
+      const tex = new THREE.CanvasTexture(c);
+      tex.needsUpdate = true;
+      return tex;
+    }
+    const smokeSprite = createSmokeBlobSprite();
+
+    const PALETTE = [
+      new THREE.Color('#ff6a00'), new THREE.Color('#ffb347'),
+      new THREE.Color('#00e5ff'), new THREE.Color('#ff3d9a'),
+      new THREE.Color('#fff6e6')
+    ];
+    const COLOR_DIM = 0.6; // additive blending stacks brightness fast when particles overlap, so tone the source colors down
+
+    // ─── Reusable dust stage: a full particle system (geometry, material,
+    // group, per-particle seeds) plus an update function driven purely by
+    // a 0-1 progress value. Used twice — once per transition — so both
+    // stages share identical, well-tested motion logic.
+    function createDustStage(count) {
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: BASE_PARTICLE_SIZE,
+        map: smokeSprite,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const pointCloud = new THREE.Points(geometry, material);
+      const group = new THREE.Group();
+      group.add(pointCloud);
+      scene.add(group);
+
+      for (let i = 0; i < count; i++) {
+        const c = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+        colors[i * 3] = c.r * COLOR_DIM; colors[i * 3 + 1] = c.g * COLOR_DIM; colors[i * 3 + 2] = c.b * COLOR_DIM;
+      }
+      geometry.attributes.color.needsUpdate = true;
+
+      const seedRadius = new Float32Array(count);
+      const seedPhase = new Float32Array(count);
+      const seedTurns = new Float32Array(count);
+      const seedDir = new Float32Array(count);
+      const seedExplosion = new Float32Array(count);
+      const seedNoiseAmt = new Float32Array(count);
+      const seedNoiseDir = new Float32Array(count * 3);
+      const seedCurlFreqA = new Float32Array(count);
+      const seedCurlFreqB = new Float32Array(count);
+      const seedCurlPhaseA = new Float32Array(count * 3);
+      const seedCurlPhaseB = new Float32Array(count * 3);
+      const seedCurlAmt = new Float32Array(count);
+      for (let i = 0; i < count; i++) {
+        seedRadius[i] = 1.6 + Math.random() * 3.2;
+        seedPhase[i] = Math.random() * Math.PI * 2;
+        seedTurns[i] = 2.2 + Math.random() * 2.5;
+        seedDir[i] = Math.random() < 0.5 ? 1 : -1;
+        seedExplosion[i] = 0.2 + Math.random() * 0.4;
+        seedNoiseAmt[i] = 0.05 + Math.random() * 0.15;
+        const nTheta = Math.random() * Math.PI * 2;
+        const nPhi = Math.acos(Math.random() * 2 - 1);
+        seedNoiseDir[i * 3] = Math.sin(nPhi) * Math.cos(nTheta);
+        seedNoiseDir[i * 3 + 1] = Math.sin(nPhi) * Math.sin(nTheta);
+        seedNoiseDir[i * 3 + 2] = Math.cos(nPhi);
+        seedCurlFreqA[i] = 2 + Math.random() * 3;
+        seedCurlFreqB[i] = 5 + Math.random() * 5;
+        seedCurlAmt[i] = 0.08 + Math.random() * 0.15;
+        for (let k = 0; k < 3; k++) {
+          seedCurlPhaseA[i * 3 + k] = Math.random() * Math.PI * 2;
+          seedCurlPhaseB[i * 3 + k] = Math.random() * Math.PI * 2;
+        }
+      }
+
+      return {
+        count, geometry, material, group,
+        seedRadius, seedPhase, seedTurns, seedDir, seedExplosion, seedNoiseAmt, seedNoiseDir,
+        seedCurlFreqA, seedCurlFreqB, seedCurlPhaseA, seedCurlPhaseB, seedCurlAmt,
+        startShape: null, endShape: null, ready: false
+      };
+    }
+
+    function updateDustStage(stage, t, startWorld, endWorld, mouseTiltX, mouseTiltY) {
+      if (!stage.ready) { stage.material.opacity = 0; return; }
+
+      let opacity;
+      if (t < FADE_ZONE) opacity = (t / FADE_ZONE) * MAX_OPACITY;
+      else if (t > 1 - FADE_ZONE) opacity = ((1 - t) / FADE_ZONE) * MAX_OPACITY;
+      else opacity = MAX_OPACITY;
+      stage.material.opacity = opacity;
+      stage.material.size = BASE_PARTICLE_SIZE * (1 + 0.5 * Math.sin(Math.PI * t));
+
+      stage.group.rotation.y = mouseTiltY;
+      stage.group.rotation.x = mouseTiltX;
+      stage.group.position.set(
+        startWorld.x + (endWorld.x - startWorld.x) * t,
+        startWorld.y + (endWorld.y - startWorld.y) * t,
+        startWorld.z + (endWorld.z - startWorld.z) * t
+      );
+
+      const posArr = stage.geometry.attributes.position.array;
+      const swirlEnvelope = Math.pow(Math.sin(Math.PI * t), 1.7);
+      const curlPhase = t * Math.PI * 2;
+
+      for (let i = 0; i < stage.count; i++) {
+        const sx = stage.startShape[i * 3], sy = stage.startShape[i * 3 + 1], sz = stage.startShape[i * 3 + 2];
+        const ex = stage.endShape[i * 3], ey = stage.endShape[i * 3 + 1], ez = stage.endShape[i * 3 + 2];
+
+        const bx = sx + (ex - sx) * t;
+        const by = sy + (ey - sy) * t;
+        const bz = sz + (ez - sz) * t;
+
+        const distFromCenter = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+        const explosionAmt = stage.seedExplosion[i] * swirlEnvelope;
+        const explX = (bx / distFromCenter) * explosionAmt;
+        const explY = (by / distFromCenter) * explosionAmt;
+        const explZ = (bz / distFromCenter) * explosionAmt;
+
+        const dx = ex - sx, dy = ey - sy, dz = ez - sz;
+        const dlen = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+        const dirx = dx / dlen, diry = dy / dlen, dirz = dz / dlen;
+        let px = -diry, py = dirx, pz = 0;
+        let plen = Math.sqrt(px * px + py * py + pz * pz);
+        if (plen < 0.001) { px = 1; py = 0; pz = 0; plen = 1; }
+        px /= plen; py /= plen; pz /= plen;
+        const qx = diry * pz - dirz * py, qy = dirz * px - dirx * pz, qz = dirx * py - diry * px;
+
+        const angle = stage.seedDir[i] * (t * stage.seedTurns[i] * Math.PI * 2 + stage.seedPhase[i]);
+        const radius = stage.seedRadius[i] * swirlEnvelope;
+        const ox = (px * Math.cos(angle) + qx * Math.sin(angle)) * radius;
+        const oy = (py * Math.cos(angle) + qy * Math.sin(angle)) * radius;
+        const oz = (pz * Math.cos(angle) + qz * Math.sin(angle)) * radius;
+
+        const curlAmt = stage.seedCurlAmt[i] * swirlEnvelope;
+        const curlX = (Math.sin(curlPhase * stage.seedCurlFreqA[i] + stage.seedCurlPhaseA[i * 3]) * 0.6
+                     + Math.sin(curlPhase * stage.seedCurlFreqB[i] + stage.seedCurlPhaseB[i * 3]) * 0.4) * curlAmt;
+        const curlY = (Math.sin(curlPhase * stage.seedCurlFreqA[i] + stage.seedCurlPhaseA[i * 3 + 1]) * 0.6
+                     + Math.sin(curlPhase * stage.seedCurlFreqB[i] + stage.seedCurlPhaseB[i * 3 + 1]) * 0.4) * curlAmt;
+        const curlZ = (Math.sin(curlPhase * stage.seedCurlFreqA[i] + stage.seedCurlPhaseA[i * 3 + 2]) * 0.6
+                     + Math.sin(curlPhase * stage.seedCurlFreqB[i] + stage.seedCurlPhaseB[i * 3 + 2]) * 0.4) * curlAmt;
+
+        const noiseAmt = stage.seedNoiseAmt[i] * swirlEnvelope;
+        const nx = stage.seedNoiseDir[i * 3] * noiseAmt + curlX;
+        const ny = stage.seedNoiseDir[i * 3 + 1] * noiseAmt + curlY;
+        const nz = stage.seedNoiseDir[i * 3 + 2] * noiseAmt + curlZ;
+
+        posArr[i * 3] = bx + explX + ox + nx;
+        posArr[i * 3 + 1] = by + explY + oy + ny;
+        posArr[i * 3 + 2] = bz + explZ + oz + nz;
+      }
+      stage.geometry.attributes.position.needsUpdate = true;
+    }
+
+    const stageA = createDustStage(PARTICLE_COUNT); // headphones -> sword
+    const stageB = createDustStage(PARTICLE_COUNT); // sword -> box
+
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath('assets/draco/');
+    const loader = new THREE.GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+
+    loader.load('assets/model_1.glb', (gltf) => {
+      const hpFitDistance = 1 / (0.45 * Math.tan(THREE.MathUtils.degToRad(45) / 2));
+      const targetSize = computeMatchedDustSize(document.getElementById('model-viewer-container'), 2.5, hpFitDistance, 45);
+      stageA.startShape = centerAndScale(sampleSurfacePoints(gltf.scene, PARTICLE_COUNT), targetSize);
+      if (stageA.endShape) { stageA.ready = true; console.log('Stage A dust ready.'); }
+    }, undefined, (err) => console.error('Particle effect: headphones load failed', err));
+
+    // The sword is loaded once and used three ways: sampled into stage A's
+    // end shape, sampled again into stage B's start shape (so the dust
+    // leaving the sword matches its resting appearance), and handed to a
+    // real solid-model viewer that fades in/out around it.
+    loader.load('assets/sword.glb', (gltf) => {
+      const SWORD_SIZE_MULTIPLIER = 6.4;
+      const swordFitDistance = SWORD_SIZE_MULTIPLIER / (1.05 * Math.tan(THREE.MathUtils.degToRad(45) / 2));
+      const targetSize = computeMatchedDustSize(document.getElementById('sword-viewer-container'), SWORD_SIZE_MULTIPLIER, swordFitDistance, 45);
+      stageA.endShape = centerAndScale(sampleSurfacePoints(gltf.scene, PARTICLE_COUNT), targetSize);
+      if (stageA.startShape) { stageA.ready = true; console.log('Stage A dust ready.'); }
+      stageB.startShape = centerAndScale(sampleSurfacePoints(gltf.scene, PARTICLE_COUNT), targetSize);
+      if (stageB.endShape) { stageB.ready = true; console.log('Stage B dust ready.'); }
+
+      initSolidViewer({
+        modelScene: gltf.scene,
+        containerId: 'sword-viewer-container',
+        canvasId: 'sword-canvas',
+        loadingId: 'swordLoading',
+        sizeMultiplier: SWORD_SIZE_MULTIPLIER,
+        fillFraction: 1.05,
+        cameraFov: 45,
+        getVisibility: () => {
+          // Fades in as stage A completes, fades back out as stage B begins
+          // — the sword only stays fully solid in the gap between the two.
+          const fadeIn = scrollProgressA > 1 - FADE_ZONE ? (scrollProgressA - (1 - FADE_ZONE)) / FADE_ZONE : 0;
+          const fadeOut = scrollProgressB > 0 ? 1 - Math.min(1, scrollProgressB / FADE_ZONE) : 1;
+          return Math.min(1, Math.max(0, fadeIn)) * Math.min(1, Math.max(0, fadeOut));
+        }
+      });
+    }, undefined, (err) => console.error('Particle effect: sword load failed', err));
+
+    // The product box: heavier, uncompressed asset — loaded once, sampled
+    // into stage B's end shape, and rendered solid once the second
+    // transition completes.
+    loader.load('assets/pipeline-model.glb', (gltf) => {
+      const BOX_SIZE_MULTIPLIER = 1.3;
+      const boxFitDistance = BOX_SIZE_MULTIPLIER / (0.9 * Math.tan(THREE.MathUtils.degToRad(45) / 2));
+      const targetSize = computeMatchedDustSize(document.getElementById('box-viewer-container'), BOX_SIZE_MULTIPLIER, boxFitDistance, 45);
+      stageB.endShape = centerAndScale(sampleSurfacePoints(gltf.scene, PARTICLE_COUNT), targetSize);
+      if (stageB.startShape) { stageB.ready = true; console.log('Stage B dust ready.'); }
+
+      initSolidViewer({
+        modelScene: gltf.scene,
+        containerId: 'box-viewer-container',
+        canvasId: 'box-canvas',
+        loadingId: 'boxLoading',
+        sizeMultiplier: BOX_SIZE_MULTIPLIER,
+        fillFraction: 0.9,
+        cameraFov: 45,
+        lightIntensityMultiplier: 1.25,
+        getVisibility: () => {
+          const fadeIn = scrollProgressB > 1 - FADE_ZONE ? (scrollProgressB - (1 - FADE_ZONE)) / FADE_ZONE : 0;
+          return Math.min(1, Math.max(0, fadeIn));
+        }
+      });
+    }, undefined, (err) => console.error('Particle effect: box load failed', err));
+
+    // ─── Anchor points tracked live from actual page layout ───
+    const heroAnchor = document.getElementById('home');
+    const reviewsAnchor = document.getElementById('reviews');
+    const pipelineAnchor = document.getElementById('pipeline');
+
+    function screenPointToWorld(clientX, clientY, depth) {
+      const ndcX = (clientX / window.innerWidth) * 2 - 1;
+      const ndcY = -(clientY / window.innerHeight) * 2 + 1;
+      const vec = new THREE.Vector3(ndcX, ndcY, 0.5);
+      vec.unproject(camera);
+      const dir = vec.sub(camera.position).normalize();
+      const distance = (depth - camera.position.z) / dir.z;
+      return camera.position.clone().add(dir.multiplyScalar(distance));
+    }
+
+    function getContainerCenterWorld(containerId, fallbackAnchor, fallbackFracX, fallbackFracY) {
+      const el = document.getElementById(containerId);
+      if (el) {
+        const r = el.getBoundingClientRect();
+        return screenPointToWorld(r.left + r.width * 0.5, r.top + r.height * 0.5, 0);
+      }
+      if (!fallbackAnchor) return new THREE.Vector3(0, 0, 0);
+      const r = fallbackAnchor.getBoundingClientRect();
+      return screenPointToWorld(r.left + r.width * fallbackFracX, r.top + r.height * fallbackFracY, 0);
+    }
+
+    function getHeroWorldPos() {
+      if (!heroAnchor) return new THREE.Vector3(0, 0, 0);
+      const r = heroAnchor.getBoundingClientRect();
+      return screenPointToWorld(r.left + r.width * 0.78, r.top + r.height * 0.5, 0);
+    }
+
+    // ─── Scroll progress for each stage — stage A spans hero -> Reviews,
+    // stage B spans Reviews -> Pipeline. Recomputed on scroll/resize/layout.
+    let scrollProgressA = 0;
+    let scrollProgressB = 0;
+    function updateScrollProgress() {
+      if (heroAnchor && reviewsAnchor) {
+        const startY = heroAnchor.offsetTop;
+        const endY = reviewsAnchor.offsetTop - window.innerHeight * 0.35;
+        scrollProgressA = Math.min(1, Math.max(0, (window.scrollY - startY) / Math.max(1, endY - startY)));
+      }
+      if (reviewsAnchor && pipelineAnchor) {
+        const startY = reviewsAnchor.offsetTop;
+        const endY = pipelineAnchor.offsetTop - window.innerHeight * 0.35;
+        scrollProgressB = Math.min(1, Math.max(0, (window.scrollY - startY) / Math.max(1, endY - startY)));
+      }
+    }
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    updateScrollProgress();
+
+    function handleResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      updateScrollProgress();
+    }
+    window.addEventListener('resize', handleResize);
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => updateScrollProgress());
+      ro.observe(document.body);
+    }
+
+    // ─── Mouse tracking for the dust clouds' parallax tilt — the only
+    // motion not driven by scroll, since it's direct user input.
+    let mouseTargetX = 0, mouseTargetY = 0;
+    let mouseTiltX = 0, mouseTiltY = 0;
+    window.addEventListener('mousemove', (e) => {
+      mouseTargetX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseTargetY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    // ─── Animate both stages ───
+    function animate() {
+      requestAnimationFrame(animate);
+
+      mouseTiltY += (mouseTargetX * 0.35 - mouseTiltY) * 0.05;
+      mouseTiltX += (mouseTargetY * 0.18 - mouseTiltX) * 0.05;
+
+      const heroWorld = getHeroWorldPos();
+      const swordWorld = getContainerCenterWorld('sword-viewer-container', reviewsAnchor, 0.82, 0.18);
+      const boxWorld = getContainerCenterWorld('box-viewer-container', pipelineAnchor, 0.7, 0.4);
+
+      updateDustStage(stageA, scrollProgressA, heroWorld, swordWorld, mouseTiltX, mouseTiltY);
+      updateDustStage(stageB, scrollProgressB, swordWorld, boxWorld, mouseTiltX, mouseTiltY);
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ─── Generic solid-model viewer — mirrors the hero headphones viewer:
+    // studio lighting, auto-framing, mouse-tracking tilt. Visibility is
+    // controlled by the caller's getVisibility() callback, so each viewer
+    // can fade in/out on whatever schedule fits its place in the sequence.
+    function initSolidViewer(opts) {
+      const container = document.getElementById(opts.containerId);
+      const modelCanvas = document.getElementById(opts.canvasId);
+      const loadingLabel = document.getElementById(opts.loadingId);
+      if (!container || !modelCanvas) return;
+
+      const scene2 = new THREE.Scene();
+      const camera2 = new THREE.PerspectiveCamera(opts.cameraFov, container.clientWidth / container.clientHeight, 0.1, 100);
+      camera2.position.set(0, 0, 6);
+      camera2.lookAt(0, 0, 0);
+
+      const renderer2 = new THREE.WebGLRenderer({ canvas: modelCanvas, antialias: true, alpha: true });
+      renderer2.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer2.setSize(container.clientWidth, container.clientHeight);
+      renderer2.outputEncoding = THREE.sRGBEncoding;
+      renderer2.physicallyCorrectLights = true;
+
+      const lightMult = opts.lightIntensityMultiplier || 1.0;
+      scene2.add(new THREE.AmbientLight(0x2a2420, 1.2 * lightMult));
+      const keyLight2 = new THREE.DirectionalLight(0xfff4e6, 3.2 * lightMult);
+      keyLight2.position.set(4, 5, 6);
+      scene2.add(keyLight2);
+      const fillLight2 = new THREE.DirectionalLight(0x8ea4ff, 0.9 * lightMult);
+      fillLight2.position.set(-5, 1, 3);
+      scene2.add(fillLight2);
+      const rimLight2 = new THREE.PointLight(0xff6a00, 4 * lightMult, 20, 2);
+      rimLight2.position.set(-3, 2, -4);
+      scene2.add(rimLight2);
+      const cyanLight2 = new THREE.PointLight(0x00e5ff, 3 * lightMult, 18, 2);
+      cyanLight2.position.set(3.5, 2.5, -2);
+      scene2.add(cyanLight2);
+
+      const modelGroup = new THREE.Group();
+      scene2.add(modelGroup);
+
+      const rawBox = new THREE.Box3().setFromObject(opts.modelScene);
+      const rawSphere = rawBox.getBoundingSphere(new THREE.Sphere());
+      const normalizeScale = (1 / (rawSphere.radius || 1)) * opts.sizeMultiplier;
+      opts.modelScene.scale.setScalar(normalizeScale);
+      const scaledBox = new THREE.Box3().setFromObject(opts.modelScene);
+      const center = new THREE.Vector3();
+      scaledBox.getCenter(center);
+      opts.modelScene.position.sub(center);
+
+      const vFovRad = THREE.MathUtils.degToRad(camera2.fov);
+      const fitDistance = opts.sizeMultiplier / (opts.fillFraction * Math.tan(vFovRad / 2));
+      camera2.position.set(0, 0, fitDistance);
+      camera2.lookAt(0, 0, 0);
+      camera2.updateProjectionMatrix();
+
+      modelGroup.add(opts.modelScene);
+      if (loadingLabel) loadingLabel.classList.add('hidden');
+
+      let mvTargetX = 0, mvTargetY = 0;
+      let mvRotX = 0, mvRotY = 0;
+      window.addEventListener('mousemove', (e) => {
+        mvTargetX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mvTargetY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function animateModel() {
+        requestAnimationFrame(animateModel);
+        mvRotY += (mvTargetX * 0.6 - mvRotY) * 0.06;
+        mvRotX += (mvTargetY * 0.3 - mvRotX) * 0.06;
+        modelGroup.rotation.y = mvRotY + Math.sin(Date.now() * 0.0002) * 0.05;
+        modelGroup.rotation.x = mvRotX;
+
+        const tt = Date.now() * 0.001;
+        rimLight2.intensity = (3.2 + Math.sin(tt * 1.6) * 1.2) * lightMult;
+        cyanLight2.intensity = (2.6 + Math.sin(tt * 2.3 + 1.1) * 1.2) * lightMult;
+
+        container.style.opacity = String(opts.getVisibility());
+
+        renderer2.render(scene2, camera2);
+      }
+      animateModel();
+
+      window.addEventListener('resize', () => {
+        camera2.aspect = container.clientWidth / container.clientHeight;
+        camera2.updateProjectionMatrix();
+        renderer2.setSize(container.clientWidth, container.clientHeight);
+      });
+    }
+  } catch (err) {
+    console.error('Particle morph effect failed to initialize:', err);
+  }
+});
+</script>
+
 </body>
 </html>
