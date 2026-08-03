@@ -233,8 +233,10 @@
   #box-canvas { width: 100%; height: 100%; }
   @media (max-width: 1100px) { #box-viewer-container { top: -60px; left: 26vw; width: min(100vw, 1250px); height: min(1100px, 84vh); } }
   @media (max-width: 900px) { #box-viewer-container { display: none; } }
+  .availability-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 110px; margin-bottom: 18px; padding: 6px 14px; border: 1px solid rgba(255,106,0,0.25); background: rgba(255,106,0,0.05); font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-primary); opacity: 0; animation: fadeSlideUp 0.8s 0.2s ease forwards; }
+  .availability-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 8px rgba(46,204,113,0.8); flex-shrink: 0; }
   .home-eyebrow { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--neon-orange); margin-bottom: 20px; opacity: 0; animation: fadeSlideUp 0.8s 0.4s ease forwards; }
-  .home-title { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 28px; opacity: 0; animation: fadeSlideUp 0.8s 0.6s ease forwards; color: var(--text-primary); }
+  .home-title { font-family: var(--font-display); font-size: clamp(2rem, 4.5vw, 3.8rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 28px; opacity: 0; animation: fadeSlideUp 0.8s 0.6s ease forwards; color: var(--text-primary); }
   .home-title span.accent { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255, 106, 0, 0.2); }
   .home-subtitle { font-family: var(--font-body); font-size: clamp(1rem, 1.8vw, 1.3rem); font-weight: 400; color: var(--text-primary); max-width: 600px; line-height: 1.6; margin-bottom: 48px; opacity: 0; animation: fadeSlideUp 0.8s 0.8s ease forwards; }
   .home-cta { display: flex; gap: 20px; flex-wrap: wrap; opacity: 0; animation: fadeSlideUp 0.8s 1.0s ease forwards; }
@@ -396,6 +398,7 @@
     .nav-links.open { display: flex; flex-direction: column; position: fixed; top: 70px; left: 0; right: 0; background: rgba(4,4,4,0.97); padding: 32px 24px; gap: 24px; border-bottom: 1px solid rgba(255,106,0,0.2); }
     .nav-mobile-toggle { display: flex; }
     #home { padding: 0 6vw; }
+    .availability-badge { margin-top: 80px; }
     .home-cta { gap: 12px; }
     .btn { padding: 14px 28px; font-size: 0.75rem; }
     #services { padding: 100px 6vw; }
@@ -473,8 +476,8 @@
   </div>
   <div class="home-eyebrow" data-i18n="hero.eyebrow">// 3D Artist &amp; Freelancer</div>
   <h1 class="home-title" id="home-title">
-    <span data-i18n="hero.title_part1">Precision in</span><br>
-    <span class="accent" data-i18n="hero.title_accent">Every Polygon</span>
+    <span data-i18n="hero.title_part1">Freelance Blender</span><br>
+    <span class="accent" data-i18n="hero.title_accent">3D Artist</span>
   </h1>
   <p class="home-subtitle" data-i18n="hero.subtitle">
     Професійне 3D-моделювання на замовлення, фріланс, візуалізація, текстурування, анімація та розробка low-poly й high-poly моделей у Blender для 3D-друку, ігор та дизайну.
@@ -484,7 +487,6 @@
     <a href="#gallery" class="btn btn-primary" data-i18n="hero.btn_portfolio">Portfolio</a>
     <a href="offer.html" class="btn btn-primary" data-i18n="hero.btn_contact">Contact</a>
   </div>
-  <div class="response-time-note" data-i18n="hero.response_time">⏱ Typically responds within 24 hours</div>
   <div class="profiles-row">
     <a href="https://www.upwork.com/freelancers/~01f5c09465b2df56f2?mp_source=share" target="_blank" class="profile-link upwork"><svg class="profile-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.561 13.158c-1.102 0-2.135-.467-3.074-1.227l.228-1.076.008-.042c.207-1.143.849-3.06 2.839-3.06 1.492 0 2.703 1.212 2.703 2.703-.001 1.489-1.212 2.702-2.704 2.702zm0-8.14c-2.539 0-4.51 1.649-5.31 4.366-1.22-1.834-2.148-4.036-2.687-5.892H7.828v7.112c-.002 1.406-1.141 2.546-2.547 2.548-1.405-.002-2.543-1.143-2.545-2.548V3.492H0v7.112c0 2.914 2.37 5.303 5.281 5.303 2.913 0 5.283-2.389 5.283-5.303v-1.19c.529 1.107 1.182 2.229 1.974 3.221l-1.673 7.873h2.797l1.213-5.71c1.063.679 2.285 1.109 3.686 1.109 3 0 5.439-2.452 5.439-5.45 0-3-2.439-5.439-5.439-5.439z"/></svg>Upwork</a>
     <a href="https://freelancehunt.com/freelancer/topazonanton.html" target="_blank" class="profile-link freelancehunt"><svg class="profile-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5,3 H9 V21 H5 Z M9,3 H20 V8 H9 Z M9,11 H17 V16 H9 Z"/></svg>Freelancehunt</a>
@@ -1577,8 +1579,8 @@ const I18N = {
     "nav.gallery": "Галерея",
     "nav.contact": "Контакти",
     "hero.eyebrow": "// 3D Художник та Фрилансер",
-    "hero.title_part1": "Точність у",
-    "hero.title_accent": "Кожному Полігоні",
+    "hero.title_part1": "Фріланс Blender",
+    "hero.title_accent": "3D-художник",
     "hero.subtitle": "Професійне 3D-моделювання на замовлення: фріланс, візуалізація, текстурування, анімація та підготовка до друку. Стек — Blender, Substance Painter, V-Ray, Photoshop.",
     "hero.btn_learn_more": "Дізнатися більше",
     "hero.btn_portfolio": "Портфоліо",
@@ -1662,8 +1664,8 @@ const I18N = {
     "nav.gallery": "Gallery",
     "nav.contact": "Contact",
     "hero.eyebrow": "// 3D Artist & Freelancer",
-    "hero.title_part1": "Precision in",
-    "hero.title_accent": "Every Polygon",
+    "hero.title_part1": "Freelance Blender",
+    "hero.title_accent": "3D Artist",
     "hero.subtitle": "Professional 3D modeling on demand — freelance visualization, texturing, animation, and print-ready pipelines. Built with Blender, Substance Painter, V-Ray, and Photoshop.",
     "hero.btn_learn_more": "Learn More",
     "hero.btn_portfolio": "Portfolio",
@@ -1747,8 +1749,8 @@ const I18N = {
     "nav.gallery": "Галерея",
     "nav.contact": "Контакты",
     "hero.eyebrow": "// 3D Художник и Фрилансер",
-    "hero.title_part1": "Точность в",
-    "hero.title_accent": "Каждом Полигоне",
+    "hero.title_part1": "Фриланс Blender",
+    "hero.title_accent": "3D-художник",
     "hero.subtitle": "Профессиональное 3D-моделирование на заказ — фриланс, визуализация, текстурирование, анимация и подготовка к печати. Работаю в Blender, Substance Painter, V-Ray, Photoshop.",
     "hero.btn_learn_more": "Подробнее",
     "hero.btn_portfolio": "Портфолио",
